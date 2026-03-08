@@ -2,7 +2,7 @@
 
 An interactive visualization exploring the parallel evolution of disciplines, institutions, and knowledge regimes from 20,000 BCE to the present day.
 
-**[View the live visualization →](https://github.com/[username]/KnowledgeEcosystems)** *(Update this link after deployment)*
+**[View the live visualization →](https://enkerli.github.io/KnowledgeEcosystems/)**
 
 ## Overview
 
@@ -188,16 +188,17 @@ If you use this dataset in academic work, consider citing:
 
 ```
 Knowledge Ecosystems: Parallel Timelines Dataset (2025).
-Available at: https://github.com/[username]/KnowledgeEcosystems
+Available at: https://enkerli.github.io/KnowledgeEcosystems/
+Repository: https://github.com/Enkerli/KnowledgeEcosystems
 Released under CC0 1.0 Universal Public Domain Dedication.
 ```
 
 ## Links
 
-- **Live Demo**: *[Add Github Pages URL after deployment]*
-- **Repository**: *[Add Github repo URL]*
-- **Issues**: *[Add Github issues URL]*
-- **Discussions**: *[Add Github discussions URL]*
+- **Live Demo**: [https://enkerli.github.io/KnowledgeEcosystems/](https://enkerli.github.io/KnowledgeEcosystems/)
+- **Repository**: [https://github.com/Enkerli/KnowledgeEcosystems](https://github.com/Enkerli/KnowledgeEcosystems)
+- **Issues**: [https://github.com/Enkerli/KnowledgeEcosystems/issues](https://github.com/Enkerli/KnowledgeEcosystems/issues)
+- **Discussions**: [https://github.com/Enkerli/KnowledgeEcosystems/discussions](https://github.com/Enkerli/KnowledgeEcosystems/discussions)
 
 ---
 
