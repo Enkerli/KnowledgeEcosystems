@@ -1,0 +1,39 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Claude Code
+.claude/
+
+# Temporary files
+*.tmp
+*.bak
+*~
+.*.swp
+
+# Editor directories
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Working files (not for deployment)
+data_*.json
+index[0-9].html
+deep-research-report*.md
+*.docx
+*.pdf
+knowledge_ecosystems_candidates_*.json
+README.txt
+SandboxLink.md
+
+# Node modules (if added later)
+node_modules/
+
+# Build outputs
+dist/
+build/

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Parallel Timelines of Knowledge, Disciplines, and Institutions</title>
+<style>
+  :root{
+    --bg:#0b1020;
+    --panel:#121933;
+    --panel-2:#1a2344;
+    --text:#e9eefc;
+    --muted:#aeb8dc;
+    --accent:#7cc7ff;
+    --line:#2f3a69;
+    --pill:#24305a;
+    --disc:#7cc7ff;
+    --inst:#91f0a5;
+    --know:#f0bf6a;
+    --link:#d784ff;
+    --chip:#0d1430;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    background:linear-gradient(180deg,#0b1020,#0d1328 35%,#0a0f1f);
+    color:var(--text);
+  }
+  .app{display:grid; grid-template-columns:380px minmax(680px,1fr); min-height:100vh;}
+  aside{
+    background:rgba(18,25,51,0.92);
+    border-right:1px solid rgba(255,255,255,0.08);
+    padding:18px 16px 14px;
+    position:sticky; top:0; height:100vh; overflow:auto;
+    backdrop-filter: blur(10px);
+  }
+  main{min-width:0; padding:18px 18px 24px;}
+  h1{font-size:1.35rem; line-height:1.2; margin:0 0 6px}
+  .sub{color:var(--muted); font-size:.94rem; line-height:1.4; margin-bottom:16px}
+  .section-title{font-size:.82rem; letter-spacing:.08em; text-transform:uppercase; color:#c4cced; margin:18px 0 8px}
+  label{display:block; font-size:.88rem; color:#d5defd; margin-bottom:6px}
+  input[type="search"], select{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.1);
+    background:#0c1329; color:var(--text); outline:none;
+  }
+  input[type="range"]{width:100%}
+  .stack{display:grid; gap:10px}
+  .checks{display:grid; gap:8px}
+  .check{
+    display:flex; align-items:center; gap:10px;
+    background:#0d1430; border:1px solid rgba(255,255,255,.06);
+    padding:10px 12px; border-radius:10px;
+  }
+  .check input{accent-color:var(--accent)}
+  .legend-dot{width:10px; height:10px; border-radius:50%}
+  .legend-disc{background:var(--disc)}
+  .legend-inst{background:var(--inst)}
+  .legend-know{background:var(--know)}
+  .pill,.chip{
+    display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; background:var(--pill); color:#dce6ff; font-size:.8rem;
+    border:1px solid rgba(255,255,255,.06); margin:0 6px 6px 0;
+  }
+  .chip-btn{
+    display:inline-flex; gap:8px; align-items:center; padding:8px 11px; border-radius:999px; background:var(--chip); color:#dce6ff; font-size:.8rem;
+    border:1px solid rgba(255,255,255,.08); margin:0 6px 6px 0; cursor:pointer;
+  }
+  .chip-btn.active{background:#223262; border-color:rgba(255,255,255,.2)}
+  .small{font-size:.82rem; color:var(--muted); line-height:1.45}
+  .buttons{display:flex; flex-wrap:wrap; gap:8px}
+  button{
+    background:#0f1734; color:var(--text); border:1px solid rgba(255,255,255,.08); border-radius:10px;
+    padding:9px 12px; cursor:pointer;
+  }
+  button:hover{background:#162048}
+  .stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:12px 0}
+  .stat{background:#0d1430; border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:12px;}
+  .stat strong{display:block; font-size:1.25rem}
+  .stat span{font-size:.8rem; color:var(--muted)}
+  .viz-wrap{
+    background:rgba(18,25,51,.65); border:1px solid rgba(255,255,255,.08); border-radius:18px; overflow:hidden;
+    box-shadow:0 10px 40px rgba(0,0,0,.28);
+  }
+  .topbar{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:14px; padding:14px 16px; background:rgba(255,255,255,.03);
+    border-bottom:1px solid rgba(255,255,255,.06);
+  }
+  .topbar h2{font-size:1rem; margin:0 0 6px}
+  .topbar p{margin:0; color:var(--muted); font-size:.88rem; line-height:1.4}
+  .canvas-wrap{overflow:auto; background:
+    linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0)),
+    radial-gradient(circle at top left, rgba(124,199,255,0.09), transparent 35%);
+  }
+  svg{display:block}
+  .axis text{fill:#b5c0e7; font-size:12px}
+  .axis line,.axis path{stroke:#6070a9; stroke-opacity:.55}
+  .track-label{fill:#f3f6ff; font-size:15px; font-weight:650}
+  .track-band{fill:rgba(255,255,255,.015)}
+  .event-rect{stroke:rgba(255,255,255,.14); stroke-width:1; rx:7; ry:7; cursor:pointer;}
+  .event-rect:hover{stroke:#fff; stroke-width:1.5}
+  .event-label{fill:#f8fbff; font-size:12px; pointer-events:none;}
+  .event-faint{opacity:.16}
+  .event-highlight{filter: drop-shadow(0 0 8px rgba(255,255,255,.35));}
+  .link-line{stroke:var(--link); stroke-opacity:.28; stroke-width:1.4; fill:none; pointer-events:none;}
+  .link-strong{stroke-opacity:.82; stroke-width:2.4}
+  .mini-help{padding:12px 16px; border-top:1px solid rgba(255,255,255,.06); color:var(--muted); font-size:.82rem}
+  .detail{margin-top:14px; background:#0d1430; border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px;}
+  .detail h3{margin:0 0 6px; font-size:1.05rem}
+  .detail .meta{color:var(--muted); font-size:.88rem; line-height:1.5}
+  .detail p{font-size:.92rem; line-height:1.55}
+  .detail-chips{margin-top:10px}
+  .related{margin-top:10px}
+  .related h4{margin:0 0 8px; font-size:.88rem; color:#d5defd}
+  .related button{padding:7px 10px; font-size:.82rem}
+  .footer-note{color:var(--muted); font-size:.82rem; margin-top:14px; line-height:1.45;}
+  a{color:#a9dbff}
+  @media (max-width: 1080px){
+    .app{grid-template-columns:1fr}
+    aside{position:relative; height:auto; border-right:none; border-bottom:1px solid rgba(255,255,255,.08)}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <h1>Parallel Timelines</h1>
+    <div class="sub">Interactive prototype aligning disciplines, institutions, and knowledge regimes on one historical axis. This version adds thematic overlays for gender, credentialism, research funding, applied/fundamental cycles, indigenous perspectives, Vietnam, global knowledge hubs, and cultural/intellectual circles.</div>
+
+    <div class="stats">
+      <div class="stat"><strong id="visibleCount">0</strong><span>visible events</span></div>
+      <div class="stat"><strong id="yearMin">–</strong><span>from year</span></div>
+      <div class="stat"><strong id="yearMax">–</strong><span>to year</span></div>
+    </div>
+
+    <div class="section-title">Search</div>
+    <div class="stack">
+      <input id="searchInput" type="search" placeholder="Search title, category, region, tags…" />
+    </div>
+
+    <div class="section-title">Perspective preset</div>
+    <select id="perspectiveSelect">
+      <option value="All">All perspectives</option>
+    </select>
+
+    <div class="section-title">Thematic overlay</div>
+    <select id="themeSelect">
+      <option value="All">All themes</option>
+    </select>
+
+    <div class="section-title">Quick storylines</div>
+    <div id="storylineChips"></div>
+
+    <div class="section-title">Tracks</div>
+    <div class="checks">
+      <label class="check"><input type="checkbox" class="trackCheck" value="Disciplines" checked><span class="legend-dot legend-disc"></span>Disciplines</label>
+      <label class="check"><input type="checkbox" class="trackCheck" value="Institutions" checked><span class="legend-dot legend-inst"></span>Institutions</label>
+      <label class="check"><input type="checkbox" class="trackCheck" value="Knowledge Regimes" checked><span class="legend-dot legend-know"></span>Knowledge Regimes</label>
+    </div>
+
+    <div class="section-title">Region</div>
+    <select id="regionSelect">
+      <option value="All">All regions</option>
+    </select>
+
+    <div class="section-title">Category</div>
+    <select id="categorySelect">
+      <option value="All">All categories</option>
+    </select>
+
+    <div class="section-title">Time window</div>
+    <label for="startRange">Start year: <span id="startLabel"></span></label>
+    <input id="startRange" type="range" min="-1000" max="2025" step="25" value="-500">
+    <label for="endRange">End year: <span id="endLabel"></span></label>
+    <input id="endRange" type="range" min="-1000" max="2025" step="25" value="2025">
+
+    <div class="section-title">Actions</div>
+    <div class="buttons">
+      <button id="resetBtn">Reset filters</button>
+      <button id="fitBtn">Fit full width</button>
+      <button id="toggleLinksBtn">Hide links</button>
+    </div>
+
+    <div class="section-title">Legend</div>
+    <div>
+      <span class="pill"><span class="legend-dot legend-disc"></span>Discipline event</span>
+      <span class="pill"><span class="legend-dot legend-inst"></span>Institution event</span>
+      <span class="pill"><span class="legend-dot legend-know"></span>Knowledge regime event</span>
+      <span class="pill">Purple curves = cross-track links</span>
+    </div>
+
+    <div class="detail" id="detailPanel">
+      <h3>Select an event</h3>
+      <div class="meta">Click any bar on the timeline to inspect it and jump across connected events.</div>
+      <p>This prototype is designed as a layered research interface rather than a complete scholarly chronology.</p>
+    </div>
+
+    <div class="footer-note">
+      Seeded dataset note: this version adds richer thematic overlays and perspective filters, including cultural movements, literary circles, salons, and schools of thought, but it is still a starter corpus. It is ready for denser regional timelines, citations, and more granular institutional lineages.
+    </div>
+  </aside>
+
+  <main>
+    <div class="viz-wrap">
+      <div class="topbar">
+        <div>
+          <h2>Historical axis with synchronized tracks</h2>
+          <p>Bars show duration; clicking highlights linked events across tracks. Use perspective presets and thematic overlays to shift the story told by the same underlying timeline.</p>
+        </div>
+        <div class="small">Years BCE are shown as negative values internally and labeled as BCE on the axis.</div>
+      </div>
+      <div class="canvas-wrap">
+        <svg id="timelineSvg" width="2000" height="820" aria-label="Interactive parallel timeline"></svg>
+      </div>
+      <div class="mini-help">Try presets such as <em>Women and gender</em>, <em>Aotearoa New Zealand</em>, <em>Vietnam</em>, <em>Knowledge hubs</em>, or <em>Cultural movements and circles</em>. Theme filters also work well with terms like <em>credentialism</em>, <em>dilettantism</em>, <em>research funding</em>, <em>art periodization</em>, and <em>literary circles</em>.</div>
+    </div>
+  </main>
+</div>
+
+<script>
+const COLORS = {
+  "Disciplines": getComputedStyle(document.documentElement).getPropertyValue('--disc').trim(),
+  "Institutions": getComputedStyle(document.documentElement).getPropertyValue('--inst').trim(),
+  "Knowledge Regimes": getComputedStyle(document.documentElement).getPropertyValue('--know').trim()
+};
+
+const TRACKS = ["Disciplines", "Institutions", "Knowledge Regimes"];
+const TRACK_Y = {"Disciplines": 190, "Institutions": 415, "Knowledge Regimes": 640};
+const LANE_HEIGHT = 24;
+const TRACK_BAND_HEIGHT = 170;
+const MARGIN = {top: 40, right: 40, bottom: 60, left: 180};
+const STORYLINES = [
+  'Women and gender',
+  'Credentialism and professionalization',
+  'Applied and mission-oriented research',
+  'Indigenous / Decolonial',
+  'Aotearoa New Zealand',
+  'Vietnam',
+  'Knowledge hubs',
+  'State and policy leadership',
+  'Cultural movements and circles',
+  'Language sciences',
+  'Health and wellness',
+  'Engineering disciplines',
+  'Civilization Tech Tree'
+];
+
+let allEvents = [];
+let filteredEvents = [];
+let selectedId = null;
+let showLinks = true;
+let activeStoryline = 'All';
+
+const svg = document.getElementById('timelineSvg');
+const NS = "http://www.w3.org/2000/svg";
+
+function createSVG(tag, attrs = {}) {
+  const el = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+function fmtYear(y){
+  if (y < 0) return `${Math.abs(y)} BCE`;
+  return `${y} CE`;
+}
+
+function clampRanges(){
+  const start = +document.getElementById('startRange').value;
+  const end = +document.getElementById('endRange').value;
+  if (start > end) document.getElementById('endRange').value = start;
+  document.getElementById('startLabel').textContent = fmtYear(+document.getElementById('startRange').value);
+  document.getElementById('endLabel').textContent = fmtYear(+document.getElementById('endRange').value);
+}
+
+function uniqueSorted(list){
+  return Array.from(new Set(list)).sort((a,b)=>a.localeCompare(b));
+}
+
+function populateFilters(data){
+  const regions = uniqueSorted(data.flatMap(d => d.region.split('/').map(s => s.trim())));
+  const categories = uniqueSorted(data.map(d => d.category));
+  const themes = uniqueSorted(data.flatMap(d => d.tags || []));
+  const perspectives = uniqueSorted(data.flatMap(d => d.perspectives || []));
+
+  const regionSelect = document.getElementById('regionSelect');
+  const categorySelect = document.getElementById('categorySelect');
+  const themeSelect = document.getElementById('themeSelect');
+  const perspectiveSelect = document.getElementById('perspectiveSelect');
+
+  for(const r of regions){
+    const o = document.createElement('option'); o.value = r; o.textContent = r; regionSelect.appendChild(o);
+  }
+  for(const c of categories){
+    const o = document.createElement('option'); o.value = c; o.textContent = c; categorySelect.appendChild(o);
+  }
+  for(const t of themes){
+    const o = document.createElement('option'); o.value = t; o.textContent = t; themeSelect.appendChild(o);
+  }
+  for(const p of perspectives){
+    const o = document.createElement('option'); o.value = p; o.textContent = p; perspectiveSelect.appendChild(o);
+  }
+
+  const chipWrap = document.getElementById('storylineChips');
+  const allBtn = document.createElement('button');
+  allBtn.className = 'chip-btn active';
+  allBtn.dataset.storyline = 'All';
+  allBtn.textContent = 'All';
+  chipWrap.appendChild(allBtn);
+  for (const s of STORYLINES){
+    const btn = document.createElement('button');
+    btn.className = 'chip-btn';
+    btn.dataset.storyline = s;
+    btn.textContent = s;
+    chipWrap.appendChild(btn);
+  }
+  chipWrap.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeStoryline = btn.dataset.storyline;
+      chipWrap.querySelectorAll('button').forEach(b => b.classList.toggle('active', b === btn));
+      if (activeStoryline !== 'All') document.getElementById('perspectiveSelect').value = activeStoryline;
+      else document.getElementById('perspectiveSelect').value = 'All';
+      filterEvents();
+    });
+  });
+}
+
+function matchesPerspective(ev, perspective){
+  if (perspective === 'All') return true;
+  return (ev.perspectives || []).includes(perspective);
+}
+
+function matchesTheme(ev, theme){
+  if (theme === 'All') return true;
+  return (ev.tags || []).includes(theme);
+}
+
+function filterEvents(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const region = document.getElementById('regionSelect').value;
+  const category = document.getElementById('categorySelect').value;
+  const theme = document.getElementById('themeSelect').value;
+  const perspective = document.getElementById('perspectiveSelect').value;
+  const trackSet = new Set(Array.from(document.querySelectorAll('.trackCheck:checked')).map(el => el.value));
+  const start = +document.getElementById('startRange').value;
+  const end = +document.getElementById('endRange').value;
+
+  filteredEvents = allEvents.filter(ev => {
+    if (!trackSet.has(ev.track)) return false;
+    if (region !== 'All' && !ev.region.includes(region)) return false;
+    if (category !== 'All' && ev.category !== category) return false;
+    if (!matchesTheme(ev, theme)) return false;
+    if (!matchesPerspective(ev, perspective)) return false;
+    const hay = [ev.title, ev.category, ev.region, ev.description, ...(ev.tags || []), ...(ev.perspectives || [])].join(' ').toLowerCase();
+    if (q && !hay.includes(q)) return false;
+    if (ev.end < start || ev.start > end) return false;
+    return true;
+  });
+
+  document.getElementById('visibleCount').textContent = filteredEvents.length;
+  document.getElementById('yearMin').textContent = fmtYear(start);
+  document.getElementById('yearMax').textContent = fmtYear(end);
+
+  if (selectedId && !filteredEvents.some(d => d.id === selectedId)) {
+    selectedId = null;
+    renderDetail(null);
+  }
+  drawTimeline();
+}
+
+function laneLayout(events){
+  const grouped = Object.fromEntries(TRACKS.map(t => [t, []]));
+  for(const ev of events) grouped[ev.track].push(ev);
+  const lanesById = {};
+  for(const track of TRACKS){
+    const arr = grouped[track].slice().sort((a,b) => a.start - b.start || a.end - b.end);
+    const laneEnds = [];
+    for(const ev of arr){
+      let lane = 0;
+      while(lane < laneEnds.length && ev.start <= laneEnds[lane]) lane++;
+      if(lane === laneEnds.length) laneEnds.push(ev.end);
+      else laneEnds[lane] = ev.end;
+      lanesById[ev.id] = lane;
+    }
+  }
+  return lanesById;
+}
+
+function xScaleFactory(minYear, maxYear, width){
+  const innerW = width - MARGIN.left - MARGIN.right;
+  return function(year){
+    return MARGIN.left + ((year - minYear) / (maxYear - minYear)) * innerW;
+  }
+}
+
+function drawAxis(root, xScale, minYear, maxYear, width, height){
+  const axisG = createSVG('g', {class:'axis'});
+  const ticks = [];
+  const span = maxYear - minYear;
+  let step = 100;
+  if (span <= 600) step = 50;
+  if (span <= 250) step = 25;
+  if (span > 2200) step = 200;
+
+  const startTick = Math.ceil(minYear / step) * step;
+  for(let y = startTick; y <= maxYear; y += step) ticks.push(y);
+
+  const y = height - MARGIN.bottom;
+  axisG.appendChild(createSVG('line', {x1:MARGIN.left, y1:y, x2:width-MARGIN.right, y2:y, stroke:'#6070a9'}));
+
+  for(const t of ticks){
+    const x = xScale(t);
+    axisG.appendChild(createSVG('line', {x1:x, y1:MARGIN.top - 8, x2:x, y2:y, stroke:'#4f5f96', 'stroke-opacity':0.35}));
+    axisG.appendChild(createSVG('line', {x1:x, y1:y, x2:x, y2:y+6, stroke:'#6070a9'}));
+    const tx = createSVG('text', {x, y:y+22, 'text-anchor':'middle'});
+    tx.textContent = t < 0 ? `${Math.abs(t)} BCE` : `${t}`;
+    axisG.appendChild(tx);
+  }
+  root.appendChild(axisG);
+}
+
+function drawTrackBands(root, width){
+  for(const track of TRACKS){
+    const yCenter = TRACK_Y[track];
+    const bandY = yCenter - 106;
+    const band = createSVG('rect', {
+      x: MARGIN.left, y: bandY, width: width - MARGIN.left - MARGIN.right, height: TRACK_BAND_HEIGHT,
+      class: 'track-band', rx: 14, ry: 14
+    });
+    root.appendChild(band);
+
+    const label = createSVG('text', {x: 24, y: yCenter - 52, class:'track-label'});
+    label.textContent = track;
+    root.appendChild(label);
+  }
+}
+
+function bezierPath(x1, y1, x2, y2){
+  const dx = Math.abs(x2 - x1);
+  const c = Math.max(36, Math.min(180, dx * 0.35));
+  return `M ${x1} ${y1} C ${x1 + c} ${y1}, ${x2 - c} ${y2}, ${x2} ${y2}`;
+}
+
+function detailChips(list){
+  if (!list || !list.length) return '';
+  return `<div class="detail-chips">${list.map(item => `<span class="chip">${item}</span>`).join('')}</div>`;
+}
+
+function renderDetail(ev){
+  const panel = document.getElementById('detailPanel');
+  if (!ev){
+    panel.innerHTML = `
+      <h3>Select an event</h3>
+      <div class="meta">Click any bar on the timeline to inspect it and jump across connected events.</div>
+      <p>This prototype is designed as a layered research interface rather than a complete scholarly chronology.</p>
+    `;
+    return;
+  }
+  const related = (ev.links || []).map(id => allEvents.find(e => e.id === id)).filter(Boolean);
+  panel.innerHTML = `
+    <h3>${ev.title}</h3>
+    <div class="meta">${ev.track} · ${ev.category} · ${ev.region}<br>${fmtYear(ev.start)} → ${fmtYear(ev.end)}</div>
+    <p>${ev.description}</p>
+    <div class="small">Themes</div>
+    ${detailChips(ev.tags)}
+    <div class="small">Perspectives</div>
+    ${detailChips(ev.perspectives)}
+    <div class="related">
+      <h4>Related events</h4>
+      <div class="buttons">
+        ${related.length ? related.map(r => `<button data-jump="${r.id}">${r.title}</button>`).join('') : '<span class="small">No related events listed.</span>'}
+      </div>
+    </div>
+  `;
+  panel.querySelectorAll('button[data-jump]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedId = btn.getAttribute('data-jump');
+      const target = allEvents.find(e => e.id === selectedId);
+      renderDetail(target);
+      drawTimeline();
+      const elem = document.getElementById(`event-${selectedId}`);
+      if (elem) elem.scrollIntoView({behavior:'smooth', block:'center', inline:'center'});
+    });
+  });
+}
+
+function selectedLinkedIds(){
+  const selected = allEvents.find(e => e.id === selectedId);
+  return new Set(selected ? (selected.links || []) : []);
+}
+
+function drawTimeline(){
+  const width = svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width ? svg.viewBox.baseVal.width : +svg.getAttribute('width');
+  const height = +svg.getAttribute('height');
+  svg.innerHTML = '';
+  const root = createSVG('g');
+  svg.appendChild(root);
+
+  const start = +document.getElementById('startRange').value;
+  const end = +document.getElementById('endRange').value;
+  const xScale = xScaleFactory(start, end, width);
+
+  drawTrackBands(root, width);
+  drawAxis(root, xScale, start, end, width, height);
+
+  const lanes = laneLayout(filteredEvents);
+  const visibleById = new Map(filteredEvents.map(e => [e.id, e]));
+  const linkedIds = selectedLinkedIds();
+
+  if (showLinks) {
+    const linkG = createSVG('g');
+    linkG.setAttribute('id','link-layer');
+    const selected = selectedId ? visibleById.get(selectedId) : null;
+
+    for(const ev of filteredEvents){
+      for(const linkId of ev.links || []){
+        if (!visibleById.has(linkId)) continue;
+        if (ev.id > linkId) continue;
+        const other = visibleById.get(linkId);
+        const x1 = xScale(Math.max(start, Math.min(end, (ev.start + ev.end)/2 )));
+        const x2 = xScale(Math.max(start, Math.min(end, (other.start + other.end)/2 )));
+        const y1 = TRACK_Y[ev.track] - 70 + lanes[ev.id] * (LANE_HEIGHT + 4) + 10;
+        const y2 = TRACK_Y[other.track] - 70 + lanes[other.id] * (LANE_HEIGHT + 4) + 10;
+        const path = createSVG('path', {d:bezierPath(x1,y1,x2,y2), class:'link-line'});
+        if (selected && (selected.id === ev.id || selected.id === other.id)) path.classList.add('link-strong');
+        linkG.appendChild(path);
+      }
+    }
+    root.appendChild(linkG);
+  }
+
+  const eventG = createSVG('g');
+  root.appendChild(eventG);
+
+  for(const ev of filteredEvents){
+    const lane = lanes[ev.id] || 0;
+    const y = TRACK_Y[ev.track] - 70 + lane * (LANE_HEIGHT + 4);
+    const x1 = xScale(Math.max(ev.start, start));
+    const x2 = xScale(Math.min(ev.end, end));
+    const widthPx = Math.max(14, x2 - x1);
+    const group = createSVG('g', {id:`event-${ev.id}`});
+    const rect = createSVG('rect', {
+      x:x1, y, width:widthPx, height:LANE_HEIGHT,
+      fill:COLORS[ev.track], class:'event-rect'
+    });
+    const isSelected = selectedId === ev.id;
+    if (selectedId && !isSelected && !linkedIds.has(ev.id)) rect.classList.add('event-faint');
+    if (isSelected) rect.classList.add('event-highlight');
+    rect.addEventListener('click', () => {
+      selectedId = ev.id;
+      renderDetail(ev);
+      drawTimeline();
+    });
+
+    group.appendChild(rect);
+    if (widthPx > 72){
+      const label = createSVG('text', {x:x1 + 8, y:y + 16, class:'event-label'});
+      label.textContent = ev.title;
+      if (selectedId && !isSelected && !linkedIds.has(ev.id)) label.classList.add('event-faint');
+      group.appendChild(label);
+    }
+    eventG.appendChild(group);
+  }
+}
+
+async function init(){
+  const res = await fetch('./data.json');
+  allEvents = await res.json();
+  populateFilters(allEvents);
+  clampRanges();
+
+  document.getElementById('searchInput').addEventListener('input', filterEvents);
+  document.getElementById('regionSelect').addEventListener('change', filterEvents);
+  document.getElementById('categorySelect').addEventListener('change', filterEvents);
+  document.getElementById('themeSelect').addEventListener('change', filterEvents);
+  document.getElementById('perspectiveSelect').addEventListener('change', (e) => {
+    activeStoryline = e.target.value;
+    document.querySelectorAll('#storylineChips .chip-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.storyline === activeStoryline));
+    filterEvents();
+  });
+  document.querySelectorAll('.trackCheck').forEach(el => el.addEventListener('change', filterEvents));
+  document.getElementById('startRange').addEventListener('input', () => { clampRanges(); filterEvents(); });
+  document.getElementById('endRange').addEventListener('input', () => { clampRanges(); filterEvents(); });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('regionSelect').value = 'All';
+    document.getElementById('categorySelect').value = 'All';
+    document.getElementById('themeSelect').value = 'All';
+    document.getElementById('perspectiveSelect').value = 'All';
+    activeStoryline = 'All';
+    document.querySelectorAll('#storylineChips .chip-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.storyline === 'All'));
+    document.querySelectorAll('.trackCheck').forEach(el => el.checked = true);
+    document.getElementById('startRange').value = -500;
+    document.getElementById('endRange').value = 2025;
+    clampRanges();
+    selectedId = null;
+    renderDetail(null);
+    filterEvents();
+  });
+  document.getElementById('fitBtn').addEventListener('click', () => {
+    document.getElementById('startRange').value = -500;
+    document.getElementById('endRange').value = 2025;
+    clampRanges();
+    filterEvents();
+  });
+  document.getElementById('toggleLinksBtn').addEventListener('click', (e) => {
+    showLinks = !showLinks;
+    e.target.textContent = showLinks ? 'Hide links' : 'Show links';
+    drawTimeline();
+  });
+
+  filterEvents();
+}
+
+init();
+</script>
+</body>
+</html>
